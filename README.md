@@ -17,19 +17,6 @@ You can install the development version of langAssessR from GitHub:
 ``` r
 # install.packages("devtools")
 devtools::install_github("kimberlyjg/langAssessR")
-#> Using GitHub PAT from the git credential store.
-#> Downloading GitHub repo kimberlyjg/langAssessR@HEAD
-#> 
-#> ── R CMD build ─────────────────────────────────────────────────────────────────
-#> * checking for file ‘/private/var/folders/wc/87g9qsxj2_ncbg72xltc0_2w0000gn/T/RtmpfVZMyO/remotesb51e16af7de6/kimberlyjg-langAssessR-908449a/DESCRIPTION’ ... OK
-#> * preparing ‘langAssessR’:
-#> * checking DESCRIPTION meta-information ... OK
-#> * checking for LF line-endings in source and make files and shell scripts
-#> * checking for empty or unneeded directories
-#> Omitted ‘LazyData’ from DESCRIPTION
-#> * building ‘langAssessR_0.1.0.tar.gz’
-#> Installing package into '/private/var/folders/wc/87g9qsxj2_ncbg72xltc0_2w0000gn/T/RtmpVaKHuC/temp_libpathb445531f41c0'
-#> (as 'lib' is unspecified)
 ```
 
 ## Example

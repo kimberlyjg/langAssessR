@@ -24,7 +24,7 @@ R package for bias-aware, explainable, and generalizable language-based assessme
 
 You can install the development version of langAssessR from GitHub:
 
-```{r}
+```{r install, eval=FALSE}
 # install.packages("devtools")
 devtools::install_github("kimberlyjg/langAssessR")
 ```
