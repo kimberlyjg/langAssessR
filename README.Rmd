@@ -18,37 +18,41 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of langAssessR is to ...
+R package for bias-aware, explainable, and generalizable language-based assessment with built-in contamination testing, cross-context validation, and fairness auditing.
 
 ## Installation
 
-You can install the development version of langAssessR like so:
+You can install the development version of langAssessR from GitHub:
 
-``` r
-# FILL THIS IN! HOW CAN PEOPLE INSTALL YOUR DEV PACKAGE?
+```{r}
+# install.packages("devtools")
+devtools::install_github("kimberlyjg/langAssessR")
 ```
 
 ## Example
 
-This is a basic example which shows you how to solve a common problem:
+This is a basic example showing the core functionality:
 
 ```{r example}
 library(langAssessR)
-## basic example code
+
+# Simulate data
+sim <- simulate_lang_data(n = 200, n_sites = 3)
+
+# Extract features from transcripts
+features <- la_features(sim$transcripts$narrative)
+head(features)
+
+# Fit a model
+model <- la_fit(features[,-1], sim$participants$y_bin)
+
+# Make predictions and evaluate
+pred <- la_predict(model, features[,-1])
+eval <- la_eval(pred, sim$participants$y_bin)
+eval$summary
+
+# Check cross-site generalization
+cv <- cross_context_cv(features[,-1], sim$participants$y_bin, sim$participants$site)
+cv$site_estimates
 ```
 
-What is special about using `README.Rmd` instead of just `README.md`? You can include R chunks like so:
-
-```{r cars}
-summary(cars)
-```
-
-You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date. `devtools::build_readme()` is handy for this.
-
-You can also embed plots, for example:
-
-```{r pressure, echo = FALSE}
-plot(pressure)
-```
-
-In that case, don't forget to commit and push the resulting figure files, so they display on GitHub and CRAN.
