@@ -1,0 +1,141 @@
+---
+title: "fairness-audit"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{fairness-audit}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(langAssessR)
+library(ggplot2)
+library(dplyr)
+set.seed(456)
+```
+
+**Why Fairness Auditing Matters**
+
+Language-based models can perform differently across demographic groups,
+potentially amplifying healthcare disparities. Systematic fairness
+auditing reveals these biases.
+
+**Demonstration**
+
+1.  **Generate diverse population data**
+
+```{r}
+# Simulate data with demographic variation
+sim <- simulate_lang_data(n = 400, n_sites = 3, seed = 789)
+
+# Extract features and fit model
+features <- la_features(sim$transcripts$narrative)
+model <- la_fit(features[,-1], sim$participants$y_bin)
+predictions <- la_predict(model, features[,-1])
+
+# Prepare subgroup data
+subgroups <- data.frame(
+  sex = sim$participants$sex,
+  race = sim$participants$race,
+  age_group = sim$participants$age_group
+)
+
+# Show group distributions
+table(subgroups$sex)
+table(subgroups$race)
+table(subgroups$age_group)
+```
+
+2.  **Conduct fairness audit**
+
+```{r}
+fairness_results <- audit_fairness(
+  pred = predictions,
+  y = sim$participants$y_bin,
+  groups = subgroups,
+  threshold = 0.5
+)
+
+# Performance by subgroup
+print(fairness_results$auc_by_group)
+
+# Error balance
+print(fairness_results$error_balance)
+```
+
+3.  **Visualize disparities**
+
+```{r}
+# AUC by subgroup
+plot_auc_by_group(fairness_results$auc_by_group) +
+  geom_hline(yintercept = 0.5, linetype = "dashed", color = "red", alpha = 0.5) +
+  labs(subtitle = "Performance disparities across demographic groups")
+# Calibration by sex
+if(nrow(fairness_results$calibration_bins) > 0) {
+  plot_calibration_by_group(fairness_results$calibration_bins) +
+    labs(subtitle = "Calibration differences indicate systematic over/under-prediction")
+}
+# Error balance (FNR - FPR)
+plot_error_balance(fairness_results$error_balance) +
+  labs(subtitle = "Asymmetric errors reveal which groups face more false negatives vs false positives")
+```
+
+4.  **Quantify disparities**
+
+```{r}
+# Calculate disparity metrics
+auc_by_group <- fairness_results$auc_by_group
+
+# Find max disparity
+auc_range <- range(auc_by_group$auc, na.rm = TRUE)
+max_disparity <- diff(auc_range)
+
+# Identify worst-performing group
+worst_group <- auc_by_group %>%
+  filter(auc == min(auc, na.rm = TRUE)) %>%
+  pull(subgroup)
+
+# Best-performing group  
+best_group <- auc_by_group %>%
+  filter(auc == max(auc, na.rm = TRUE)) %>%
+  pull(subgroup)
+
+cat("Maximum AUC disparity:", round(max_disparity, 3), "\n")
+cat("Best performance:", best_group, "(AUROC =", round(max(auc_by_group$auc, na.rm = TRUE), 3), ")\n")
+cat("Worst performance:", worst_group, "(AUROC =", round(min(auc_by_group$auc, na.rm = TRUE), 3), ")\n")
+```
+
+**Implications**
+
+These disparities suggest the model may:
+
+-   Work better for some populations than others
+
+-   Require group-specific calibration
+
+-   Need more diverse training data
+
+-   Benefit from fairness-aware training methods
+
+**Recommendations**
+
+1.  Always audit: Check subgroup performance before deployment
+
+2.  Set thresholds: Define acceptable disparity levels
+
+3.  Document disparities: Include in model cards
+
+4.  Monitor post-deployment: Track real-world fairness metrics
+
+5.  Consider interventions: Reweighting, resampling, or fairness
+    constraints

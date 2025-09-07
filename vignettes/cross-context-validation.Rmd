@@ -1,0 +1,117 @@
+---
+title: "cross-context-validation"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{cross-context-validation}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(langAssessR)
+library(ggplot2)
+library(dplyr)
+set.seed(123)
+```
+
+**The Challenge of Generalizability**
+
+Models trained on one site, population, or context often fail when applied elsewhere. *Leave-site-out cross-validation* tests whether models generalize across contexts.
+
+**Demonstration**
+
+1.  **Prepare multi-site data**
+
+```{r}
+# Generate data with site effects
+sim <- simulate_lang_data(n = 300, n_sites = 4, seed = 42)
+
+# Extract features
+features <- la_features(sim$transcripts$narrative)
+X <- features[, -1]  # Remove ID column
+y <- sim$participants$y_bin
+sites <- sim$participants$site
+
+# Show site distribution
+table(sites)
+```
+
+2.  **Run leave-site-out cross-validation**
+
+```{r}
+# Compare leave-site-out vs pooled k-fold CV
+cv_results <- cross_context_cv(
+  x = X,
+  y = y,
+  site = sites,
+  leave_site_out = TRUE,
+  k = 5,
+  seed = 123
+)
+
+# Site-specific performance
+print(cv_results$site_estimates)
+
+# Overall comparison
+print(cv_results$compare)
+```
+
+3.  **Visualize generalization gap**
+
+```{r}
+# Plot site-wise performance
+plot_site_performance(cv_results$site_estimates, metric_label = "AUROC") +
+  geom_hline(yintercept = 0.5, linetype = "dashed", color = "red", alpha = 0.5) +
+  labs(subtitle = "Performance when each site is held out for testing")
+# Forest plot comparing approaches
+if (!is.null(cv_results$compare)) {
+  plot_forest_compare(cv_results$compare) +
+    labs(subtitle = "Pooled CV overestimates performance vs. leave-site-out")
+}
+```
+
+4.  **Quantify the generalization gap**
+
+```{r}
+# Calculate the gap
+pooled_perf <- cv_results$compare %>%
+  filter(site == "Overall", model == "Pooled CV") %>%
+  pull(estimate)
+
+lso_mean <- cv_results$site_estimates %>%
+  summarise(mean_auc = mean(estimate, na.rm = TRUE)) %>%
+  pull(mean_auc)
+
+gap <- pooled_perf - lso_mean
+
+cat("Pooled CV AUROC:", round(pooled_perf, 3), "\n")
+cat("Mean LSO AUROC:", round(lso_mean, 3), "\n")
+cat("Generalization gap:", round(gap, 3), "\n")
+```
+
+**Interpretation**
+
+The generalization gap reveals how much performance drops when models face truly new contexts. This is critical for:
+
+-   Realistic performance expectations
+
+-   Identifying models that won't transfer
+
+-   Highlighting the need for diverse training data
+
+**Recommendations**
+
+1.  Always test on held-out sites/contexts
+
+2.  Report both pooled and leave-site-out metrics
+
+3.  Consider the gap when planning deployments
+
+4.  Collect diverse, multi-site training data when possible
