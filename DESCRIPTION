@@ -1,10 +1,29 @@
 Package: langAssessR
-Title: What the Package Does (One Line, Title Case)
-Version: 0.0.0.9000
+Title: Bias-Aware Language-Based Assessment in R
+Version: 0.1.0
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
+    person("Kimberly", "Gilbert", email = "kjg6@fordham.edu", 
+           role = c("aut", "cre"))
+Description: Provides an end-to-end pipeline for language-based assessment with 
+    built-in contamination testing, cross-context validation, explainability, 
+    and fairness auditing.
 License: MIT + file LICENSE
 Encoding: UTF-8
+LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
+Imports:
+    stats,
+    utils,
+    scales,
+    ggplot2,
+    cli
+Suggests:
+    glmnet,
+    yaml,
+    testthat (>= 3.0.0),
+    rmarkdown,
+    dplyr,
+    tidyr,
+    patchwork
+Config/testthat/edition: 3
