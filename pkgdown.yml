@@ -6,7 +6,8 @@ articles:
   cross-context-validation: cross-context-validation.html
   decision-curves: decision-curves.html
   fairness-audit: fairness-audit.html
-last_built: 2025-09-07T20:59Z
+  model-cards: model-cards.html
+last_built: 2025-09-07T21:06Z
 urls:
   reference: https://kimberlyjg.github.io/langAssessR/reference
   article: https://kimberlyjg.github.io/langAssessR/articles
