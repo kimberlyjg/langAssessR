@@ -4,8 +4,9 @@ pkgdown_sha: ~
 articles:
   contamination-demo: contamination-demo.html
   cross-context-validation: cross-context-validation.html
+  decision-curves: decision-curves.html
   fairness-audit: fairness-audit.html
-last_built: 2025-09-07T20:48Z
+last_built: 2025-09-07T20:59Z
 urls:
   reference: https://kimberlyjg.github.io/langAssessR/reference
   article: https://kimberlyjg.github.io/langAssessR/articles
