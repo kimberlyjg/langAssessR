@@ -16,6 +16,7 @@ knitr::opts_chunk$set(
 # langAssessR
 
 <!-- badges: start -->
+[![R-CMD-check](https://github.com/kimberlyjg/langAssessR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/kimberlyjg/langAssessR/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 R package for bias-aware, explainable, and generalizable language-based assessment with built-in contamination testing, cross-context validation, and fairness auditing.

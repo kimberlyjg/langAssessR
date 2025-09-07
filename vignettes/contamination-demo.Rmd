@@ -1,0 +1,122 @@
+---
+title: "contamination-demo"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{contamination-demo}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(langAssessR)
+library(ggplot2)
+set.seed(123)
+```
+
+**The Problem of Criterion Contamination**
+
+When language-based models are trained on structured assessments (like
+diagnostic interviews), they may achieve high accuracy simply by
+learning the assessment's own language patterns rather than meaningful
+psychological constructs. This is *criterion contamination*.
+
+**Demonstration 1. Generate synthetic data**
+
+```{r}
+# Simulate data with both structured and narrative transcripts
+sim <- simulate_lang_data(n = 300, n_sites = 3, seed = 42)
+
+# Extract features from both transcript types
+feat_structured <- la_features(sim$transcripts$structured)
+feat_narrative <- la_features(sim$transcripts$narrative)
+
+# Get outcomes
+y_primary <- sim$participants$y_bin
+y_external <- sim$participants$y_ext  # External validation criterion
+```
+
+2.  **Train Mirror vs Non-Mirror models**
+
+```{r}
+# Mirror model: trained on structured (assessment-proximal) language
+model_mirror <- la_fit_mirror(feat_structured[,-1], y_primary)
+
+# Non-mirror model: trained on narrative (assessment-distal) language  
+model_nonmirror <- la_fit_nonmirror(feat_narrative[,-1], y_primary)
+
+# Get predictions
+pred_mirror_in <- la_predict(model_mirror, feat_structured[,-1])
+pred_nonmirror_in <- la_predict(model_nonmirror, feat_narrative[,-1])
+
+# Also predict on external criterion
+pred_mirror_ext <- pred_mirror_in  # Simplified for demo
+pred_nonmirror_ext <- pred_nonmirror_in
+```
+
+3.  **Check for contamination**
+
+```{r}
+contamination_result <- check_contamination(
+  in_mirror = pred_mirror_in,
+  in_nonmirror = pred_nonmirror_in,
+  y_in = y_primary,
+  ext_mirror = pred_mirror_ext,
+  ext_nonmirror = pred_nonmirror_ext,
+  y_ext = y_external,
+  metric = "auc"
+)
+
+print(contamination_result)
+```
+
+4.  **Visualize the contamination effect**
+
+```{r}
+# Create comparison data
+comparison_df <- data.frame(
+  Model = rep(c("Mirror", "Non-Mirror"), 2),
+  Criterion = rep(c("In-Sample", "External"), each = 2),
+  AUROC = c(
+    contamination_result$in_mirror,
+    contamination_result$in_nonmirror,
+    contamination_result$external_mirror,
+    contamination_result$external_nonmirror
+  )
+)
+
+# Plot
+ggplot(comparison_df, aes(x = Criterion, y = AUROC, fill = Model)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  scale_fill_manual(values = c("Mirror" = "#D95F02", "Non-Mirror" = "#1B9E77")) +
+  ylim(0, 1) +
+  labs(
+    title = "Criterion Contamination: Mirror vs Non-Mirror Models",
+    subtitle = paste("Risk:", contamination_result$risk_flag),
+    y = "AUROC",
+    x = "Evaluation Criterion"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold"),
+    legend.position = "bottom"
+  )
+```
+
+**Interpretation**
+
+The Mirror model shows inflated performance on in-sample data but this
+advantage disappears (or reverses) when evaluated against an external
+criterion. This pattern indicates *criterion contamination.*
+
+Key takeaway: Always use Non-Mirror training data when possible, and
+validate against external criteria to detect contamination.

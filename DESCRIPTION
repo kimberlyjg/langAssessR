@@ -25,5 +25,7 @@ Suggests:
     rmarkdown,
     dplyr,
     tidyr,
-    patchwork
+    patchwork,
+    knitr
 Config/testthat/edition: 3
+VignetteBuilder: knitr
