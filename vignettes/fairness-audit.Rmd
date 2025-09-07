@@ -1,19 +1,18 @@
 ---
-title: "fairness-audit"
+title: "Fairness Auditing: Detecting Bias Across Subgroups"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{fairness-audit}
-  %\VignetteEncoding{UTF-8}
+  %\VignetteIndexEntry{Fairness Auditing: Detecting Bias Across Subgroups}
   %\VignetteEngine{knitr::rmarkdown}
-editor_options: 
-  markdown: 
-    wrap: 72
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5
 )
 ```
 

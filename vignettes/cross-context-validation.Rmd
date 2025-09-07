@@ -1,8 +1,8 @@
 ---
-title: "cross-context-validation"
+title: "Cross-Context Validation: Testing Generalizability"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{cross-context-validation}
+  %\VignetteIndexEntry{Cross-Context Validation: Testing Generalizability}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -10,7 +10,9 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5
 )
 ```
 
